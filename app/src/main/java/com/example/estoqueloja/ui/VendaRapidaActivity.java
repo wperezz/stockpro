@@ -1,8 +1,10 @@
 package com.example.estoqueloja.ui;
 
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.widget.ArrayAdapter;
-import android.widget.Spinner;
+import android.widget.AutoCompleteTextView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -12,10 +14,10 @@ import com.example.estoqueloja.R;
 import com.example.estoqueloja.data.db.DbProvider;
 import com.example.estoqueloja.data.entity.MovEstoque;
 import com.example.estoqueloja.data.entity.Produto;
-import com.example.estoqueloja.databinding.ActivityTopVendidosBinding;
 import com.example.estoqueloja.databinding.ActivityVendaRapidaBinding;
 import com.example.estoqueloja.util.AppExecutors;
 import com.example.estoqueloja.util.InsetsUtil;
+import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,43 +25,52 @@ import java.util.Locale;
 
 public class VendaRapidaActivity extends AppCompatActivity {
 
-    private Spinner spProdutos;
+    private AutoCompleteTextView acProdutos;
     private TextView txtInfoProduto;
-    private com.google.android.material.textfield.TextInputEditText edQtd, edObs;
+    private TextInputEditText edQtd, edObs;
 
     private List<Produto> produtos = new ArrayList<>();
     private ArrayAdapter<String> adapter;
+
     private long produtoIdInicial = 0;
     private ActivityVendaRapidaBinding b;
 
     private TextView txtTotalVenda, txtLucroVenda;
+
+    // controla o produto selecionado no dropdown
+    private Produto produtoSelecionado;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         b = ActivityVendaRapidaBinding.inflate(getLayoutInflater());
         setContentView(b.getRoot());
+
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
         InsetsUtil.applyPaddingSystemBarsTopBottom(b.getRoot());
-        spProdutos = findViewById(R.id.spProdutos);
+
+        acProdutos = findViewById(R.id.acProdutos);
         txtInfoProduto = findViewById(R.id.txtInfoProduto);
         edQtd = findViewById(R.id.edQtd);
         edObs = findViewById(R.id.edObs);
 
         produtoIdInicial = getIntent().getLongExtra("produtoId", 0);
 
-        carregarProdutos();
-
         findViewById(R.id.btnConfirmar).setOnClickListener(v -> confirmarVenda());
+
         findViewById(R.id.btnVenderOutra).setOnClickListener(v -> {
             edQtd.setText("");
             edObs.setText("");
-            spProdutos.requestFocus();
+            acProdutos.requestFocus();
+            // não limpa seleção automaticamente (fica a seu critério)
+            atualizarTotaisLocal();
         });
 
         findViewById(R.id.btnVoltar).setOnClickListener(v -> finish());
+
+        acProdutos.setOnClickListener(v -> acProdutos.showDropDown());
 
         TextView titulo = findViewById(R.id.txtTitulo);
         titulo.setText("Venda");
@@ -67,13 +78,15 @@ public class VendaRapidaActivity extends AppCompatActivity {
         txtTotalVenda = findViewById(R.id.txtTotalVenda);
         txtLucroVenda = findViewById(R.id.txtLucroVenda);
 
-        edQtd.addTextChangedListener(new android.text.TextWatcher() {
+        edQtd.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
                 atualizarTotaisLocal();
             }
-            @Override public void afterTextChanged(android.text.Editable s) {}
+            @Override public void afterTextChanged(Editable s) {}
         });
+
+        carregarProdutos();
     }
 
     @Override
@@ -85,40 +98,62 @@ public class VendaRapidaActivity extends AppCompatActivity {
     private void carregarProdutos() {
         AppExecutors.get().io().execute(() -> {
             produtos = DbProvider.get(this).produtoDao().listarAtivos();
+
             List<String> nomes = new ArrayList<>();
             for (Produto p : produtos) nomes.add(p.nome);
 
             AppExecutors.get().main().post(() -> {
-                adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, nomes);
-                spProdutos.setAdapter(adapter);
-
-                if (produtoIdInicial > 0) {
-                    for (int i = 0; i < produtos.size(); i++) {
-                        if (produtos.get(i).id == produtoIdInicial) {
-                            spProdutos.setSelection(i);
-                            break;
-                        }
-                    }
-                }
-
-                spProdutos.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
-                    @Override public void onItemSelected(android.widget.AdapterView<?> parent, android.view.View view, int position, long id) {
-                        atualizarInfo();
-                    }
-                    @Override public void onNothingSelected(android.widget.AdapterView<?> parent) { }
+                adapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, nomes);
+                acProdutos.setAdapter(adapter);
+                acProdutos.setOnFocusChangeListener((v, hasFocus) -> {
+                    if (hasFocus) acProdutos.showDropDown();
                 });
+                // quando escolhe um item da lista
+                acProdutos.setOnItemClickListener((parent, view, position, id) -> {
+                    String nome = (String) parent.getItemAtPosition(position);
+                    produtoSelecionado = acharProdutoPorNome(nome);
+                    atualizarInfo();
+                });
+
+                // seleção inicial por ID (se veio de outra tela)
+                if (produtoIdInicial > 0) {
+                    Produto pIni = acharProdutoPorId(produtoIdInicial);
+                    if (pIni != null) {
+                        produtoSelecionado = pIni;
+                        acProdutos.setText(pIni.nome, false); // false = não dispara filtro
+                    }
+                } else {
+                    produtoSelecionado = null;
+                    acProdutos.setText("", false);
+                }
 
                 atualizarInfo();
             });
         });
     }
 
-    private void atualizarInfo() {
-        if (produtos.isEmpty()) return;
-        int idx = spProdutos.getSelectedItemPosition();
-        if (idx < 0 || idx >= produtos.size()) return;
+    private Produto acharProdutoPorId(long id) {
+        for (Produto p : produtos) {
+            if (p.id == id) return p;
+        }
+        return null;
+    }
 
-        Produto p = produtos.get(idx);
+    private Produto acharProdutoPorNome(String nome) {
+        if (nome == null) return null;
+        for (Produto p : produtos) {
+            if (nome.equals(p.nome)) return p;
+        }
+        return null;
+    }
+
+    private void atualizarInfo() {
+        Produto p = produtoSelecionado;
+        if (p == null) {
+            txtInfoProduto.setText("Selecione um produto");
+            atualizarTotaisLocal();
+            return;
+        }
 
         AppExecutors.get().io().execute(() -> {
             int estoque = DbProvider.get(this).movDao().estoqueAtual(p.id);
@@ -132,15 +167,12 @@ public class VendaRapidaActivity extends AppCompatActivity {
     }
 
     private void confirmarVenda() {
-        if (produtos.isEmpty()) {
-            Toast.makeText(this, "Cadastre produtos primeiro.", Toast.LENGTH_LONG).show();
+        Produto p = produtoSelecionado;
+
+        if (p == null) {
+            Toast.makeText(this, "Selecione um produto.", Toast.LENGTH_LONG).show();
             return;
         }
-
-        int idx = spProdutos.getSelectedItemPosition();
-        if (idx < 0 || idx >= produtos.size()) return;
-
-        Produto p = produtos.get(idx);
 
         int qtd = parseInt(edQtd.getText() == null ? "" : edQtd.getText().toString());
         if (qtd <= 0) {
@@ -151,6 +183,12 @@ public class VendaRapidaActivity extends AppCompatActivity {
         String obs = edObs.getText() == null ? "" : edObs.getText().toString().trim();
 
         AppExecutors.get().io().execute(() -> {
+            if (p.ativo == 0) {
+                AppExecutors.get().main().post(() ->
+                        Toast.makeText(this, "Produto inativo. Reative para vender.", Toast.LENGTH_LONG).show());
+                return;
+            }
+
             int estoque = DbProvider.get(this).movDao().estoqueAtual(p.id);
             if (qtd > estoque) {
                 AppExecutors.get().main().post(() ->
@@ -166,11 +204,6 @@ public class VendaRapidaActivity extends AppCompatActivity {
             m.obs = obs;
             m.custoUnit = p.custoAtual;
             m.precoUnit = p.precoVenda;
-
-            if (p.ativo == 0) {
-                Toast.makeText(this, "Produto inativo. Reative para vender.", Toast.LENGTH_LONG).show();
-                return;
-            }
 
             DbProvider.get(this).movDao().inserir(m);
 
@@ -192,12 +225,12 @@ public class VendaRapidaActivity extends AppCompatActivity {
     }
 
     private void atualizarTotaisLocal() {
-        if (produtos.isEmpty()) return;
-
-        int idx = spProdutos.getSelectedItemPosition();
-        if (idx < 0 || idx >= produtos.size()) return;
-
-        Produto p = produtos.get(idx);
+        Produto p = produtoSelecionado;
+        if (p == null) {
+            txtTotalVenda.setText("Total: R$ 0,00");
+            txtLucroVenda.setText("Lucro: R$ 0,00");
+            return;
+        }
 
         int qtd = parseInt(edQtd.getText() == null ? "" : edQtd.getText().toString());
         if (qtd < 0) qtd = 0;
@@ -208,5 +241,4 @@ public class VendaRapidaActivity extends AppCompatActivity {
         txtTotalVenda.setText(String.format(Locale.getDefault(), "Total: R$ %.2f", total));
         txtLucroVenda.setText(String.format(Locale.getDefault(), "Lucro: R$ %.2f", lucro));
     }
-
 }
