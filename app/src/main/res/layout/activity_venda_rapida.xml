@@ -80,15 +80,37 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnConfirmar"
-            android:text="Confirmar Venda"
+            android:id="@+id/btnAdicionar"
+            android:text="Adicionar item na venda"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"/>
 
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerCarrinho"
+            android:layout_width="match_parent"
+            android:layout_height="260dp"
+            android:layout_marginTop="10dp"/>
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/txtTotalGeral"
+            android:text="Total Geral: R$ 0,00"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:layout_marginTop="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/txtLucroGeral"
+            android:text="Lucro Geral: R$ 0,00"
+            android:textStyle="bold"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnVenderOutra"
-            android:text="Vender outro item"
+            android:id="@+id/btnFinalizar"
+            android:text="Finalizar venda"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"/>

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/cardCarrinho"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="10dp"
+    app:cardElevation="2dp"
+    app:strokeWidth="1dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="12dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/txtNome"
+            android:text="Produto"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/txtResumo"
+            android:text="Preço: R$ 0,00 | Total: R$ 0,00"
+            android:layout_marginTop="4dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <LinearLayout
+            android:layout_marginTop="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnMenos"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:text="−"
+                android:textSize="22sp"
+                android:textAllCaps="false"
+                android:minWidth="0dp"
+                android:minHeight="0dp"
+                android:padding="0dp" />
+
+            <TextView
+                android:id="@+id/txtQtd"
+                android:text="1"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:layout_marginHorizontal="12dp"
+                android:padding="8dp"
+                android:background="@android:drawable/dialog_holo_light_frame"
+                android:clickable="true"
+                android:focusable="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnMais"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:text="+"
+                android:textSize="22sp"
+                android:textAllCaps="false"
+                android:minWidth="0dp"
+                android:minHeight="0dp"
+                android:padding="0dp" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnRemover"
+                android:layout_width="wrap_content"
+                android:layout_height="44dp"
+                android:text="Remover"
+                app:cornerRadius="10dp" />
+
+        </LinearLayout>
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>
