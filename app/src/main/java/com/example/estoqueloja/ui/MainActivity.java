@@ -41,6 +41,9 @@ public class MainActivity extends AppCompatActivity {
         b.btnTop.setOnClickListener(v ->
                 startActivity(new Intent(this, TopVendidosActivity.class)));
 
+        b.btnVendas.setOnClickListener(v ->
+                startActivity(new Intent(this, VendasActivity.class)));
+
         b.btnVendaRapida.setOnClickListener(v ->
                 startActivity(new Intent(this, VendaRapidaActivity.class)));
 

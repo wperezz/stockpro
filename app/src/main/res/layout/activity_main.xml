@@ -181,6 +181,15 @@
                 android:layout_marginTop="12dp"/>
 
             <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnVendas"
+                android:text="Vendas (Cancelar/Estornar)"
+                android:layout_width="260dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                app:icon="@android:drawable/ic_menu_agenda"
+                app:iconGravity="textStart"/>
+
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnExportar"
                 android:text="Exportar CSV"
                 android:layout_width="260dp"

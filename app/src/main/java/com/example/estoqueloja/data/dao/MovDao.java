@@ -11,9 +11,6 @@ import java.util.List;
 @Dao
 public interface MovDao {
 
-    @Insert
-    long inserir(MovEstoque m);
-
     @Query("SELECT * FROM mov_estoque WHERE produtoId=:produtoId ORDER BY dataHora DESC")
     List<MovEstoque> listarPorProduto(long produtoId);
 
@@ -79,5 +76,68 @@ public interface MovDao {
     @Query("SELECT COUNT(*) FROM mov_estoque WHERE produtoId = :produtoId")
     int countMovsDoProduto(long produtoId);
 
+    @androidx.room.Query(
+            "SELECT m.id AS movId, m.produtoId AS produtoId, m.dataHora AS dataHora, p.nome AS produtoNome, " +
+                    "m.quantidade AS quantidade, m.precoUnit AS precoUnit, m.custoUnit AS custoUnit, " +
+                    "(m.precoUnit * m.quantidade) AS total, " +
+                    "((m.precoUnit - m.custoUnit) * m.quantidade) AS lucro " +
+                    "FROM mov_estoque m " +
+                    "JOIN produto p ON p.id = m.produtoId " +
+                    "WHERE m.tipo = 'SAIDA' " +
+                    "ORDER BY m.dataHora DESC"
+    )
+    java.util.List<VendaRow> listarVendas();
+
+    // Já foi cancelada? (existe uma ENTRADA com obs = CANCELAMENTO#<id>)
+    @androidx.room.Query(
+            "SELECT COUNT(*) FROM mov_estoque " +
+                    "WHERE tipo = 'ENTRADA' AND obs = :obsCancel"
+    )
+    int countCancelamentos(String obsCancel);
+
+    @Query(
+            "SELECT " +
+                    "  m.vendaId AS vendaId, " +
+                    "  MAX(m.dataHora) AS dataHora, " +
+                    "  COUNT(*) AS itens, " +
+                    "  SUM(m.quantidade) AS quantidade, " +
+                    "  SUM(m.precoUnit * m.quantidade) AS total, " +
+                    "  SUM((m.precoUnit - m.custoUnit) * m.quantidade) AS lucro, " +
+                    "  CASE WHEN EXISTS ( " +
+                    "       SELECT 1 FROM mov_estoque c " +
+                    "       WHERE c.vendaId = m.vendaId AND c.tipo='ENTRADA' AND c.obs = ('CANCELAMENTO_VENDA#' || m.vendaId) " +
+                    "  ) THEN 1 ELSE 0 END AS cancelada " +
+                    "FROM mov_estoque m " +
+                    "WHERE m.tipo='SAIDA' AND m.vendaId <> 0 " +
+                    "GROUP BY m.vendaId " +
+                    "ORDER BY dataHora DESC"
+    )
+    List<com.example.estoqueloja.data.dao.VendaResumoRow> listarVendasAgrupadas();
+
+    @Query(
+            "SELECT " +
+                    "  m.id AS movId, " +
+                    "  m.produtoId AS produtoId, " +
+                    "  p.nome AS nome, " +
+                    "  m.quantidade AS quantidade, " +
+                    "  m.precoUnit AS precoUnit, " +
+                    "  m.custoUnit AS custoUnit, " +
+                    "  (m.precoUnit * m.quantidade) AS total, " +
+                    "  ((m.precoUnit - m.custoUnit) * m.quantidade) AS lucro " +
+                    "FROM mov_estoque m " +
+                    "JOIN produto p ON p.id = m.produtoId " +
+                    "WHERE m.vendaId = :vendaId AND m.tipo='SAIDA' " +
+                    "ORDER BY m.id ASC"
+    )
+    List<com.example.estoqueloja.data.dao.VendaItemRow> itensDaVendaDetalhado(long vendaId);
+
+    @Query("SELECT COUNT(*) FROM mov_estoque WHERE vendaId = :vendaId AND tipo='ENTRADA' AND obs = :obsCancel")
+    int vendaJaCancelada(long vendaId, String obsCancel);
+
+    @Query("SELECT * FROM mov_estoque WHERE vendaId = :vendaId AND tipo='SAIDA'")
+    List<com.example.estoqueloja.data.entity.MovEstoque> itensDaVenda(long vendaId);
+
+    @Insert
+    void inserir(com.example.estoqueloja.data.entity.MovEstoque m);
 
 }

@@ -328,7 +328,7 @@ public class VendaRapidaActivity extends AppCompatActivity {
                     return;
                 }
             }
-
+            long vendaId = (System.currentTimeMillis() * 1000L) + (long)(Math.random() * 1000);
             // grava em transação (tudo ou nada)
             DbProvider.get(this).runInTransaction(() -> {
                 for (com.example.estoqueloja.ui.model.VendaItem it : carrinho) {
@@ -342,7 +342,7 @@ public class VendaRapidaActivity extends AppCompatActivity {
                     m.obs = obs;
                     m.custoUnit = p.custoAtual;
                     m.precoUnit = p.precoVenda;
-
+                    m.vendaId = vendaId;
                     DbProvider.get(this).movDao().inserir(m);
                 }
             });

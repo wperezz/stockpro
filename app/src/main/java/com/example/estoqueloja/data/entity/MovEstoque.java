@@ -11,6 +11,7 @@ public class MovEstoque {
     public long id;
 
     public long produtoId;
+    public long vendaId; // 0 = antigo/sem agrupamento
 
     // "ENTRADA" ou "SAIDA"
     public String tipo;
