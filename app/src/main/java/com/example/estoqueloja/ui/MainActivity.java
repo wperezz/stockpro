@@ -101,6 +101,8 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(new Intent(this, TopVendidosActivity.class));
             } else if (id == R.id.nav_exportar) {
                 abrirExportarCsv();
+            } else if (id == R.id.nav_encomendas) {
+                startActivity(new Intent(this, EncomendasActivity.class));
             }
 
             drawer.closeDrawers();
