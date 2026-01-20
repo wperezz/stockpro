@@ -1,6 +1,10 @@
 package com.example.estoqueloja.ui;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -9,16 +13,24 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.estoqueloja.R;
 import com.example.estoqueloja.data.db.DbProvider;
+import com.example.estoqueloja.data.entity.Categoria;
 import com.example.estoqueloja.data.entity.Produto;
 import com.example.estoqueloja.databinding.ActivityProdutoFormBinding;
 import com.example.estoqueloja.util.AppExecutors;
 import com.example.estoqueloja.util.InsetsUtil;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ProdutoFormActivity extends AppCompatActivity {
 
     private ActivityProdutoFormBinding b;
     private long id = 0;
     private Produto produto;
+    private AutoCompleteTextView acCategoria;
+    private ArrayAdapter<String> adapterCategorias;
+
+    private static final int REQ_CATEGORIA = 2001;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +53,37 @@ public class ProdutoFormActivity extends AppCompatActivity {
 
         // se veio id, carregar no background (não pode Room na main thread)
         if (id > 0) carregarProdutoAsync(id);
+
+        acCategoria = findViewById(R.id.acCategoria);
+
+        findViewById(R.id.btnCategorias).setOnClickListener(v -> {
+            Intent it = new Intent(this, CategoriasActivity.class);
+            startActivityForResult(it, REQ_CATEGORIA);
+        });
+
+        acCategoria.setOnClickListener(v -> acCategoria.showDropDown());
+        acCategoria.setOnFocusChangeListener((v, hasFocus) -> { if (hasFocus) acCategoria.showDropDown(); });
+
+        carregarCategoriasAsync();
+    }
+
+    private void carregarCategoriasAsync() {
+        AppExecutors.get().io().execute(() -> {
+            List<Categoria> cats = DbProvider.get(this).categoriaDao().listar();
+            List<String> nomes = new ArrayList<>();
+            for (Categoria c : cats) nomes.add(c.nome);
+
+            AppExecutors.get().main().post(() -> {
+                adapterCategorias = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, nomes);
+                AutoCompleteTextView acCategoria = findViewById(R.id.acCategoria);
+                acCategoria.setAdapter(adapterCategorias);
+
+                // se estiver editando, preenche com a categoria atual
+                if (produto != null && produto.categoria != null) {
+                    acCategoria.setText(produto.categoria, false);
+                }
+            });
+        });
     }
 
     private void carregarProdutoAsync(long id) {
@@ -66,7 +109,7 @@ public class ProdutoFormActivity extends AppCompatActivity {
 
     private void preencher() {
         b.edNome.setText(produto.nome);
-        b.edCategoria.setText(produto.categoria);
+        ((AutoCompleteTextView)findViewById(R.id.acCategoria)).setText(produto.categoria, false);
         b.edCusto.setText(String.valueOf(produto.custoAtual));
         b.edPreco.setText(String.valueOf(produto.precoVenda));
         b.edMinimo.setText(String.valueOf(produto.estoqueMinimo));
@@ -79,7 +122,8 @@ public class ProdutoFormActivity extends AppCompatActivity {
             return;
         }
 
-        String categoria = b.edCategoria.getText().toString().trim();
+        String categoria = ((AutoCompleteTextView)findViewById(R.id.acCategoria))
+                .getText().toString().trim();
         double custo = parseDouble(b.edCusto.getText().toString());
         double preco = parseDouble(b.edPreco.getText().toString());
         int minimo = (int) parseDouble(b.edMinimo.getText().toString());
@@ -203,6 +247,14 @@ public class ProdutoFormActivity extends AppCompatActivity {
                         Toast.makeText(this, "Erro: " + e.getMessage(), Toast.LENGTH_LONG).show());
             }
         });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 2001 && resultCode == Activity.RESULT_OK) {
+            carregarCategoriasAsync();
+        }
     }
 
 }

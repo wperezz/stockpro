@@ -11,7 +11,8 @@ public class DbProvider {
         if (db == null) {
             db = Room.databaseBuilder(ctx.getApplicationContext(),
                             AppDatabase.class, "estoque.db")
-                    .addMigrations(AppDatabase.MIGRATION_3_4)
+                    .addMigrations(AppDatabase.MIGRATION_3_4, AppDatabase.MIGRATION_4_5)
+                    .fallbackToDestructiveMigration()
                     .build();
         }
         return db;
