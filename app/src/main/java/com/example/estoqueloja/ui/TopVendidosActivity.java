@@ -69,7 +69,7 @@ public class TopVendidosActivity extends AppCompatActivity {
             long ini = range[0];
             long fim = range[1];
 
-            List<TopVendidoRow> rows = DbProvider.get(this).movDao().topVendidos(ini, fim, 30);
+            List<TopVendidoRow> rows = DbProvider.get(this).movDao().topVendidosValidos(ini, fim, 30);
 
             AppExecutors.get().main().post(() -> adapter.setItens(rows));
         });
