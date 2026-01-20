@@ -1,0 +1,9 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:checkableBehavior="single">
+        <item android:id="@+id/nav_produtos" android:title="Produtos" android:icon="@android:drawable/ic_menu_sort_by_size"/>
+        <item android:id="@+id/nav_movimento" android:title="Movimentar Estoque" android:icon="@android:drawable/ic_menu_manage"/>
+        <item android:id="@+id/nav_vendas" android:title="Vendas (Cancelar/Estornar)" android:icon="@android:drawable/ic_menu_agenda"/>
+        <item android:id="@+id/nav_top" android:title="Top Vendidos" android:icon="@android:drawable/ic_menu_sort_alphabetically"/>
+        <item android:id="@+id/nav_exportar" android:title="Exportar CSV" android:icon="@android:drawable/ic_menu_save"/>
+    </group>
+</menu>

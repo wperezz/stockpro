@@ -4,7 +4,14 @@ import androidx.room.Entity;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
-@Entity(tableName = "mov_estoque", indices = {@Index("produtoId")})
+@Entity(
+        tableName = "mov_estoque",
+        indices = {
+                @Index(value = {"vendaId", "tipo", "obs"}),
+                @Index(value = {"dataHora", "tipo"}),
+                @Index(value = {"produtoId", "tipo"})
+        }
+)
 public class MovEstoque {
 
     @PrimaryKey(autoGenerate = true)
@@ -22,4 +29,6 @@ public class MovEstoque {
 
     public long dataHora;      // System.currentTimeMillis()
     public String obs;
+
+
 }

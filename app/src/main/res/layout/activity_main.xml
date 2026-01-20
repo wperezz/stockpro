@@ -1,218 +1,236 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:fillViewport="true"
+    android:id="@+id/drawer"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true">
 
+    <!-- CONTEÚDO -->
     <LinearLayout
         android:id="@+id/rootMain"
-        android:orientation="vertical"
-        android:padding="20dp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-        <com.google.android.material.textview.MaterialTextView
-            android:text="Controle de Vendas / Estoque"
-            android:textStyle="bold"
-            android:textSize="22sp"
-            android:layout_marginBottom="14dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
-
-        <!-- Hoje -->
-        <com.google.android.material.card.MaterialCardView
+        <com.google.android.material.appbar.AppBarLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardElevation="2dp"
-            app:strokeWidth="1dp"
-            android:layout_marginBottom="10dp">
+            android:fitsSystemWindows="true">
+
+            <com.google.android.material.appbar.MaterialToolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:title="Controle de Vendas / Estoque"
+                app:titleCentered="false"/>
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fillViewport="true">
 
             <LinearLayout
-                android:padding="12dp"
+                android:id="@+id/contentMain"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:padding="20dp">
 
-                <com.google.android.material.textview.MaterialTextView
-                    android:text="Hoje"
-                    android:textStyle="bold"
+                <com.google.android.material.button.MaterialButtonToggleGroup
+                    android:id="@+id/tgFiltro"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="12dp"
+                    app:selectionRequired="true"
+                    app:singleSelection="true">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnFiltroValidas"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Válidas" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnFiltroCanceladas"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Canceladas" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnFiltroTodas"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Todas" />
+                </com.google.android.material.button.MaterialButtonToggleGroup>
+
+                <!-- Hoje -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    app:cardElevation="2dp"
+                    app:strokeWidth="1dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="12dp">
+
+                        <com.google.android.material.textview.MaterialTextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Hoje"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                        <com.google.android.material.textview.MaterialTextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:text="Faturamento:" />
+
+                        <com.google.android.material.textview.MaterialTextView
+                            android:id="@+id/txtFatHoje"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="R$ 0,00"
+                            android:textSize="18sp"
+                            android:textStyle="bold" />
+
+                        <com.google.android.material.textview.MaterialTextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:text="Lucro:" />
+
+                        <com.google.android.material.textview.MaterialTextView
+                            android:id="@+id/txtLucroHoje"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="R$ 0,00"
+                            android:textSize="18sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Mês -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    app:cardElevation="2dp"
+                    app:strokeWidth="1dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="12dp">
+
+                        <com.google.android.material.textview.MaterialTextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Mês"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                        <com.google.android.material.textview.MaterialTextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:text="Faturamento:" />
+
+                        <com.google.android.material.textview.MaterialTextView
+                            android:id="@+id/txtFatMes"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="R$ 0,00"
+                            android:textSize="18sp"
+                            android:textStyle="bold" />
+
+                        <com.google.android.material.textview.MaterialTextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:text="Lucro:" />
+
+                        <com.google.android.material.textview.MaterialTextView
+                            android:id="@+id/txtLucroMes"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="R$ 0,00"
+                            android:textSize="18sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Estoque baixo -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="18dp"
+                    app:cardElevation="2dp"
+                    app:strokeWidth="1dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:padding="12dp">
+
+                        <com.google.android.material.textview.MaterialTextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Produtos com estoque baixo:"
+                            android:textStyle="bold" />
+
+                        <com.google.android.material.textview.MaterialTextView
+                            android:id="@+id/txtEstoqueBaixo"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0"
+                            android:textSize="18sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnVendaRapida"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:backgroundTint="?attr/colorPrimary"
+                    android:paddingTop="12dp"
+                    android:paddingBottom="12dp"
+                    android:text="VENDA RÁPIDA"
+                    android:textColor="@android:color/white"
                     android:textSize="16sp"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"/>
-
-                <com.google.android.material.textview.MaterialTextView
-                    android:text="Faturamento:"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"/>
-
-                <com.google.android.material.textview.MaterialTextView
-                    android:id="@+id/txtFatHoje"
-                    android:text="R$ 0,00"
                     android:textStyle="bold"
-                    android:textSize="18sp"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"/>
+                    app:cornerRadius="14dp"
+                    app:icon="@android:drawable/ic_menu_send"
+                    app:iconGravity="textStart" />
 
-                <com.google.android.material.textview.MaterialTextView
-                    android:text="Lucro:"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"/>
-
-                <com.google.android.material.textview.MaterialTextView
-                    android:id="@+id/txtLucroHoje"
-                    android:text="R$ 0,00"
-                    android:textStyle="bold"
-                    android:textSize="18sp"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"/>
             </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <!-- Mês -->
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:cardElevation="2dp"
-            app:strokeWidth="1dp"
-            android:layout_marginBottom="10dp">
-
-            <LinearLayout
-                android:padding="12dp"
-                android:orientation="vertical"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <com.google.android.material.textview.MaterialTextView
-                    android:text="Mês"
-                    android:textStyle="bold"
-                    android:textSize="16sp"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"/>
-
-                <com.google.android.material.textview.MaterialTextView
-                    android:text="Faturamento:"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"/>
-
-                <com.google.android.material.textview.MaterialTextView
-                    android:id="@+id/txtFatMes"
-                    android:text="R$ 0,00"
-                    android:textStyle="bold"
-                    android:textSize="18sp"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"/>
-
-                <com.google.android.material.textview.MaterialTextView
-                    android:text="Lucro:"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"/>
-
-                <com.google.android.material.textview.MaterialTextView
-                    android:id="@+id/txtLucroMes"
-                    android:text="R$ 0,00"
-                    android:textStyle="bold"
-                    android:textSize="18sp"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"/>
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <!-- Estoque baixo -->
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:cardElevation="2dp"
-            app:strokeWidth="1dp"
-            android:layout_marginBottom="18dp">
-
-            <LinearLayout
-                android:padding="12dp"
-                android:orientation="horizontal"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <com.google.android.material.textview.MaterialTextView
-                    android:text="Produtos com estoque baixo:"
-                    android:textStyle="bold"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"/>
-
-                <com.google.android.material.textview.MaterialTextView
-                    android:id="@+id/txtEstoqueBaixo"
-                    android:text="0"
-                    android:textStyle="bold"
-                    android:textSize="18sp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <!-- Botões -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:gravity="center_horizontal">
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnProdutos"
-                android:text="Produtos"
-                android:layout_width="260dp"
-                android:layout_height="wrap_content"/>
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnMovimentar"
-                android:text="Movimentar Estoque"
-                android:layout_width="260dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"/>
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnTop"
-                android:text="Top Vendidos"
-                android:layout_width="260dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"/>
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnVendas"
-                android:text="Vendas (Cancelar/Estornar)"
-                android:layout_width="260dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                app:icon="@android:drawable/ic_menu_agenda"
-                app:iconGravity="textStart"/>
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnExportar"
-                android:text="Exportar CSV"
-                android:layout_width="260dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"/>
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnVendaRapida"
-                android:text="VENDA RÁPIDA"
-                android:textStyle="bold"
-                android:textSize="16sp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="14dp"
-                android:paddingTop="12dp"
-                android:paddingBottom="12dp"
-                app:icon="@android:drawable/ic_menu_send"
-                app:iconGravity="textStart"
-                app:cornerRadius="14dp"
-                android:backgroundTint="?attr/colorPrimary"
-                android:textColor="@android:color/white"/>
-
-        </LinearLayout>
+        </ScrollView>
 
     </LinearLayout>
-</ScrollView>
+
+    <!-- MENU LATERAL -->
+    <com.google.android.material.navigation.NavigationView
+        android:id="@+id/navView"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        app:menu="@menu/menu_drawer" />
+
+</androidx.drawerlayout.widget.DrawerLayout>

@@ -49,6 +49,25 @@ public interface MovDao {
     java.util.List<com.example.estoqueloja.data.dao.TopVendidoRow> topVendidos(long ini, long fim, int limite);
 
     @Query(
+            "SELECT p.id as produtoId, p.nome as nome, " +
+                    "SUM(m.quantidade) as qtd, " +
+                    "SUM(m.precoUnit * m.quantidade) as faturamento, " +
+                    "SUM((m.precoUnit - m.custoUnit) * m.quantidade) as lucro " +
+                    "FROM mov_estoque m " +
+                    "INNER JOIN produto p ON p.id = m.produtoId " +
+                    "WHERE m.tipo='SAIDA' AND m.dataHora>=:ini AND m.dataHora<:fim " +
+                    "AND (m.vendaId = 0 OR NOT EXISTS ( " +
+                    "    SELECT 1 FROM mov_estoque c " +
+                    "    WHERE c.vendaId = m.vendaId AND c.tipo='ENTRADA' " +
+                    "      AND c.obs = ('CANCELAMENTO_VENDA#' || m.vendaId) " +
+                    ")) " +
+                    "GROUP BY p.id, p.nome " +
+                    "ORDER BY qtd DESC " +
+                    "LIMIT :limite"
+    )
+    List<TopVendidoRow> topVendidosValidos(long ini, long fim, int limite);
+
+    @Query(
             "SELECT produtoId as produtoId, " +
                     "COALESCE(SUM(CASE WHEN tipo='ENTRADA' THEN quantidade ELSE 0 END),0) " +
                     "- COALESCE(SUM(CASE WHEN tipo='SAIDA' THEN quantidade ELSE 0 END),0) " +
@@ -64,6 +83,20 @@ public interface MovDao {
             "WHERE m.tipo='SAIDA' AND m.dataHora>=:ini AND m.dataHora<:fim " +
             "ORDER BY m.dataHora DESC")
     java.util.List<com.example.estoqueloja.data.dao.VendaDiaRow> vendasDoDia(long ini, long fim);
+
+    @Query(
+            "SELECT m.id as id, p.nome as nome, m.quantidade as quantidade, m.precoUnit as precoUnit, m.dataHora as dataHora " +
+                    "FROM mov_estoque m " +
+                    "JOIN produto p ON p.id = m.produtoId " +
+                    "WHERE m.tipo='SAIDA' AND m.dataHora>=:ini AND m.dataHora<:fim " +
+                    "AND (m.vendaId = 0 OR NOT EXISTS ( " +
+                    "    SELECT 1 FROM mov_estoque c " +
+                    "    WHERE c.vendaId = m.vendaId AND c.tipo='ENTRADA' " +
+                    "      AND c.obs = ('CANCELAMENTO_VENDA#' || m.vendaId) " +
+                    ")) " +
+                    "ORDER BY m.dataHora DESC"
+    )
+    List<VendaDiaRow> vendasDoDiaValidas(long ini, long fim);
 
     @Query("SELECT COALESCE(SUM(m.precoUnit * m.quantidade),0) FROM mov_estoque m " +
             "WHERE m.tipo='SAIDA' AND m.dataHora>=:ini AND m.dataHora<:fim")
@@ -139,5 +172,47 @@ public interface MovDao {
 
     @Insert
     void inserir(com.example.estoqueloja.data.entity.MovEstoque m);
+
+    // filtro: 0 = válidas (default), 1 = canceladas, 2 = todas
+    @Query(
+            "SELECT COALESCE(SUM(m.precoUnit * m.quantidade),0) " +
+                    "FROM mov_estoque m " +
+                    "WHERE m.tipo='SAIDA' AND m.dataHora>=:ini AND m.dataHora<:fim " +
+                    "AND ( " +
+                    "   (:filtro = 2) " +
+                    "   OR (:filtro = 0 AND (m.vendaId = 0 OR NOT EXISTS ( " +
+                    "       SELECT 1 FROM mov_estoque c " +
+                    "       WHERE c.vendaId = m.vendaId AND c.tipo='ENTRADA' " +
+                    "         AND c.obs = ('CANCELAMENTO_VENDA#' || m.vendaId) " +
+                    "   ))) " +
+                    "   OR (:filtro = 1 AND (m.vendaId <> 0 AND EXISTS ( " +
+                    "       SELECT 1 FROM mov_estoque c " +
+                    "       WHERE c.vendaId = m.vendaId AND c.tipo='ENTRADA' " +
+                    "         AND c.obs = ('CANCELAMENTO_VENDA#' || m.vendaId) " +
+                    "   ))) " +
+                    ")"
+    )
+    double faturamentoFiltrado(long ini, long fim, int filtro);
+
+    @Query(
+            "SELECT COALESCE(SUM((m.precoUnit - m.custoUnit) * m.quantidade),0) " +
+                    "FROM mov_estoque m " +
+                    "WHERE m.tipo='SAIDA' AND m.dataHora>=:ini AND m.dataHora<:fim " +
+                    "AND ( " +
+                    "   (:filtro = 2) " +
+                    "   OR (:filtro = 0 AND (m.vendaId = 0 OR NOT EXISTS ( " +
+                    "       SELECT 1 FROM mov_estoque c " +
+                    "       WHERE c.vendaId = m.vendaId AND c.tipo='ENTRADA' " +
+                    "         AND c.obs = ('CANCELAMENTO_VENDA#' || m.vendaId) " +
+                    "   ))) " +
+                    "   OR (:filtro = 1 AND (m.vendaId <> 0 AND EXISTS ( " +
+                    "       SELECT 1 FROM mov_estoque c " +
+                    "       WHERE c.vendaId = m.vendaId AND c.tipo='ENTRADA' " +
+                    "         AND c.obs = ('CANCELAMENTO_VENDA#' || m.vendaId) " +
+                    "   ))) " +
+                    ")"
+    )
+    double lucroFiltrado(long ini, long fim, int filtro);
+
 
 }

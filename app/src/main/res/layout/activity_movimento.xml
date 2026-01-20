@@ -10,10 +10,22 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <include layout="@layout/view_header_back"/>
-        <Spinner
-            android:id="@+id/spProdutos"
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilProduto"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:hint="Produto">
+
+            <AutoCompleteTextView
+                android:id="@+id/acProdutos"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="text"
+                android:importantForAutofill="no"
+                android:singleLine="true"/>
+        </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"

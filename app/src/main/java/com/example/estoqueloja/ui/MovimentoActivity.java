@@ -2,6 +2,7 @@ package com.example.estoqueloja.ui;
 
 import android.os.Bundle;
 import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.RadioButton;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -24,18 +25,22 @@ import java.util.List;
 
 public class MovimentoActivity extends AppCompatActivity {
 
-    private Spinner spProdutos;
+
     private RadioButton rbEntrada, rbSaida;
     private TextInputEditText edQtd, edObs;
 
     private List<Produto> produtos = new ArrayList<>();
-    private ArrayAdapter<String> adapterNomes;
 
     private long produtoIdInicial = 0;
     private String tipoInicial = null;
     private ActivityMovimentoBinding b;
     private TextView txtEstoqueAtual;
 
+    private AutoCompleteTextView acProdutos;
+    private ArrayAdapter<String> adapterNomes;
+
+    // produto selecionado controlado
+    private Produto produtoSelecionado;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,7 +51,12 @@ public class MovimentoActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
         InsetsUtil.applyPaddingSystemBarsTopBottom(b.getRoot());
-        spProdutos = findViewById(R.id.spProdutos);
+        acProdutos = findViewById(R.id.acProdutos);
+
+        acProdutos.setOnClickListener(v -> acProdutos.showDropDown());
+        acProdutos.setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus) acProdutos.showDropDown();
+        });
         rbEntrada = findViewById(R.id.rbEntrada);
         rbSaida = findViewById(R.id.rbSaida);
         edQtd = findViewById(R.id.edQtd);
@@ -66,15 +76,7 @@ public class MovimentoActivity extends AppCompatActivity {
         titulo.setText("Movimento");
 
         txtEstoqueAtual = findViewById(R.id.txtEstoqueAtual);
-        spProdutos.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(android.widget.AdapterView<?> parent, android.view.View view, int position, long id) {
-                atualizarEstoqueSelecionadoAsync();
-            }
 
-            @Override
-            public void onNothingSelected(android.widget.AdapterView<?> parent) {}
-        });
     }
 
     @Override
@@ -94,22 +96,47 @@ public class MovimentoActivity extends AppCompatActivity {
                 produtos.clear();
                 produtos.addAll(lista);
 
-                adapterNomes = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, nomes);
-                spProdutos.setAdapter(adapterNomes);
+                adapterNomes = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, nomes);
+                acProdutos.setAdapter(adapterNomes);
 
-                // aplica seleção inicial, se existir
-                if (produtoIdInicial > 0) {
-                    for (int i = 0; i < produtos.size(); i++) {
-                        if (produtos.get(i).id == produtoIdInicial) {
-                            spProdutos.setSelection(i);
-                            break;
+                acProdutos.setOnItemClickListener((parent, view, position, id) -> {
+                    String nome = (String) parent.getItemAtPosition(position);
+                    produtoSelecionado = acharProdutoPorNome(nome);
+                    atualizarEstoqueSelecionadoAsync();
+                });
+
+                // se o usuário digitar/apagar manualmente, invalida seleção
+                acProdutos.addTextChangedListener(new android.text.TextWatcher() {
+                    @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+                    @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
+                        if (produtoSelecionado != null) {
+                            String t = (s == null ? "" : s.toString());
+                            if (!t.equals(produtoSelecionado.nome)) {
+                                produtoSelecionado = null;
+                                txtEstoqueAtual.setText("0");
+                            }
                         }
                     }
+                    @Override public void afterTextChanged(android.text.Editable s) {}
+                });
+
+                // aplica seleção inicial por ID (se veio de outra tela)
+                if (produtoIdInicial > 0) {
+                    Produto pIni = acharProdutoPorId(produtoIdInicial);
+                    if (pIni != null) {
+                        produtoSelecionado = pIni;
+                        acProdutos.setText(pIni.nome, false);
+                    } else {
+                        produtoSelecionado = null;
+                        acProdutos.setText("", false);
+                    }
+                } else {
+                    produtoSelecionado = null;
+                    acProdutos.setText("", false);
                 }
 
                 // aplica tipo inicial, se existir
                 if ("SAIDA".equals(tipoInicial)) rbSaida.setChecked(true);
-                else if ("ENTRADA".equals(tipoInicial)) rbEntrada.setChecked(true);
                 else rbEntrada.setChecked(true);
 
                 atualizarEstoqueSelecionadoAsync();
@@ -117,16 +144,32 @@ public class MovimentoActivity extends AppCompatActivity {
         });
     }
 
+    private Produto acharProdutoPorNome(String nome) {
+        if (nome == null) return null;
+        for (Produto p : produtos) if (nome.equals(p.nome)) return p;
+        return null;
+    }
+
+    private Produto acharProdutoPorId(long id) {
+        if (id <= 0) return null;
+        for (Produto p : produtos) {
+            if (p.id == id) return p;
+        }
+        return null;
+    }
+
     private void salvarMovAsync() {
+
         if (produtos.isEmpty()) {
             Toast.makeText(this, "Cadastre um produto primeiro", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        int idx = spProdutos.getSelectedItemPosition();
-        if (idx < 0 || idx >= produtos.size()) return;
-
-        Produto p = produtos.get(idx);
+        Produto p = produtoSelecionado;
+        if (p == null) {
+            Toast.makeText(this, "Selecione um produto.", Toast.LENGTH_LONG).show();
+            return;
+        }
 
         if (p.ativo == 0) {
             Toast.makeText(this, "Produto inativo. Reative para movimentar.", Toast.LENGTH_LONG).show();
@@ -185,15 +228,11 @@ public class MovimentoActivity extends AppCompatActivity {
     }
 
     private void atualizarEstoqueSelecionadoAsync() {
-        if (produtos.isEmpty()) {
+        Produto p = produtoSelecionado;
+        if (p == null) {
             txtEstoqueAtual.setText("0");
             return;
         }
-
-        int idx = spProdutos.getSelectedItemPosition();
-        if (idx < 0 || idx >= produtos.size()) return;
-
-        Produto p = produtos.get(idx);
 
         AppExecutors.get().io().execute(() -> {
             int estoque = DbProvider.get(this).movDao().estoqueAtual(p.id);
