@@ -215,6 +215,8 @@ public class MovimentoActivity extends AppCompatActivity {
                 edQtd.setText("");
                 edObs.setText("");
                 atualizarEstoqueSelecionadoAsync();
+                setResult(RESULT_OK);
+                finish();
             });
         });
     }

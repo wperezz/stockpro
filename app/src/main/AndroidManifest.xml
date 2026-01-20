@@ -27,11 +27,12 @@
         </activity>
         <activity android:name=".ui.ProdutoExtratoActivity" />
         <activity android:name=".ui.TopVendidosActivity" />
-        <activity android:name=".ui.VendaRapidaActivity" />
+        <activity android:name=".ui.VendaRapidaActivity" android:windowSoftInputMode="stateHidden|adjustResize" />
         <activity android:name=".ui.HistoricoDiaActivity" />
         <activity android:name=".ui.VendasActivity" />
         <activity android:name=".ui.VendaDetalheActivity" />
         <activity android:name=".ui.CategoriasActivity" />
+        <activity android:name=".ui.EncomendasActivity" />
     </application>
 
 </manifest>

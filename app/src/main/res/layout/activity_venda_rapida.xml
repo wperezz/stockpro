@@ -1,14 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
     android:padding="16dp"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <include layout="@layout/view_header_back"/>
+
+    <!-- Conteúdo principal: inputs + carrinho (carrinho rola) -->
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <include layout="@layout/view_header_back"/>
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
         <com.google.android.material.textview.MaterialTextView
             android:text="Venda Rápida"
             android:textStyle="bold"
@@ -40,6 +46,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
 
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnMovEstoque"
+            android:text="Movimentar estoque"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:visibility="gone"/>
+
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/txtTotalVenda"
             android:text="Total: R$ 0,00"
@@ -60,6 +74,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp">
+
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/edQtd"
                 android:inputType="number"
@@ -72,6 +87,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp">
+
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/edObs"
                 android:hint="Observação (opcional)"
@@ -86,18 +102,27 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"/>
 
+        <!-- Carrinho ocupa o espaço restante e rola -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerCarrinho"
             android:layout_width="match_parent"
-            android:layout_height="260dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"
             android:layout_marginTop="10dp"/>
+    </LinearLayout>
+
+    <!-- Rodapé fixo -->
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp">
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/txtTotalGeral"
             android:text="Total Geral: R$ 0,00"
             android:textStyle="bold"
             android:textSize="18sp"
-            android:layout_marginTop="10dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
 
@@ -116,4 +141,4 @@
             android:layout_marginTop="10dp"/>
     </LinearLayout>
 
-</ScrollView>
+</LinearLayout>

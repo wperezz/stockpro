@@ -214,5 +214,39 @@ public interface MovDao {
     )
     double lucroFiltrado(long ini, long fim, int filtro);
 
+    @Query(
+            "SELECT " +
+                    "  m.vendaId AS vendaId, " +
+                    "  MAX(m.dataHora) AS dataHora, " +
+                    "  COUNT(*) AS itens, " +
+                    "  SUM(m.quantidade) AS quantidade, " +
+                    "  SUM(m.precoUnit * m.quantidade) AS total, " +
+                    "  SUM((m.precoUnit - m.custoUnit) * m.quantidade) AS lucro, " +
+                    "  CASE WHEN EXISTS ( " +
+                    "       SELECT 1 FROM mov_estoque c " +
+                    "       WHERE c.vendaId = m.vendaId AND c.tipo='ENTRADA' AND c.obs = ('CANCELAMENTO_VENDA#' || m.vendaId) " +
+                    "  ) THEN 1 ELSE 0 END AS cancelada " +
+                    "FROM mov_estoque m " +
+                    "WHERE m.tipo='SAIDA' AND m.vendaId <> 0 " +
+                    "  AND m.dataHora >= :ini " +
+                    "  AND m.dataHora < :fim " +
+                    "GROUP BY m.vendaId " +
+                    "ORDER BY dataHora DESC"
+    )
+    List<VendaResumoRow> listarVendasAgrupadasPeriodo(long ini, long fim);
+
+
+    @Query(
+            "SELECT " +
+                    "  COALESCE(SUM(precoUnit * quantidade), 0) AS total, " +
+                    "  COALESCE(SUM((precoUnit - custoUnit) * quantidade), 0) AS lucro " +
+                    "FROM mov_estoque " +
+                    "WHERE vendaId <> 0 " +
+                    "  AND tipo = 'SAIDA' " +
+                    "  AND dataHora >= :ini " +
+                    "  AND dataHora < :fim"
+    )
+    VendaTotaisRow totaisVendasPeriodo(long ini, long fim);
+
 
 }

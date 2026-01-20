@@ -1,5 +1,6 @@
 package com.example.estoqueloja.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -8,6 +9,7 @@ import android.widget.AutoCompleteTextView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.estoqueloja.R;
@@ -17,6 +19,7 @@ import com.example.estoqueloja.data.entity.Produto;
 import com.example.estoqueloja.databinding.ActivityVendaRapidaBinding;
 import com.example.estoqueloja.util.AppExecutors;
 import com.example.estoqueloja.util.InsetsUtil;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.ArrayList;
@@ -45,6 +48,13 @@ public class VendaRapidaActivity extends AppCompatActivity {
     private com.example.estoqueloja.ui.adapter.VendaCarrinhoAdapter carrinhoAdapter;
 
     private TextView txtTotalGeral, txtLucroGeral;
+    private MaterialButton btnMovEstoque;
+    private final ActivityResultLauncher<Intent> movLauncher =
+            registerForActivityResult(new androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult(),
+                    result -> {
+                        // sempre que voltar, atualiza info/estoque
+                        atualizarInfo();
+                    });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -122,6 +132,10 @@ public class VendaRapidaActivity extends AppCompatActivity {
         TextView titulo = findViewById(R.id.txtTitulo);
         titulo.setText("Venda");
 
+        btnMovEstoque = findViewById(R.id.btnMovEstoque);
+
+        btnMovEstoque.setOnClickListener(v -> abrirMovimentoEstoque());
+
         carregarProdutos();
         atualizarTotaisCarrinho();
     }
@@ -183,11 +197,12 @@ public class VendaRapidaActivity extends AppCompatActivity {
     private void atualizarInfo() {
         Produto p = produtoSelecionado;
         if (p == null) {
+            btnMovEstoque.setVisibility(android.view.View.GONE);
             txtInfoProduto.setText("Selecione um produto");
             atualizarTotaisLocal();
             return;
         }
-
+        btnMovEstoque.setVisibility(android.view.View.VISIBLE);
         AppExecutors.get().io().execute(() -> {
             int estoque = DbProvider.get(this).movDao().estoqueAtual(p.id);
             AppExecutors.get().main().post(() -> {
@@ -459,6 +474,18 @@ public class VendaRapidaActivity extends AppCompatActivity {
                     });
                 })
                 .show();
+    }
+
+    private void abrirMovimentoEstoque() {
+        Produto p = produtoSelecionado;
+        if (p == null) {
+            Toast.makeText(this, "Selecione um produto.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        android.content.Intent it = new android.content.Intent(this, MovimentoActivity.class);
+        it.putExtra("produtoId", p.id);
+        it.putExtra("tipo", "ENTRADA"); // padrão
+        movLauncher.launch(it);
     }
 
 }

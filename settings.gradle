@@ -19,5 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "StockPro"
+rootProject.name = "StockFlow"
 include ':app'
